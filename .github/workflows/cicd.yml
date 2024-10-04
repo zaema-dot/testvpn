@@ -18,19 +18,17 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt update
-          sudo apt install -y build-essential pkg-config libgnutls28-dev libseccomp-dev libreadline-dev libnl-route-3-dev libproxy-dev libxml2-dev wget
+          sudo apt install -y build-essential pkg-config libgnutls28-dev libseccomp-dev libreadline-dev libnl-route-3-dev libproxy-dev libxml2-dev git autotools-dev autoconf sshpass
 
-      # 3. Download and build the latest OpenConnect from source
+      # 3. Download and build the latest OpenConnect from Git
       - name: Download and build OpenConnect from Git
         run: |
-          sudo apt update
-          sudo apt install -y git
           git clone https://gitlab.com/openconnect/openconnect.git
           cd openconnect
-          ./configure
+          ./autogen.sh  # Generate the configure script
+          ./configure   # Configure the build
           make
           sudo make install
-
 
       # 4. Connect to the VPN using OpenConnect with split tunneling
       - name: Connect to VPN with OpenConnect (split tunneling)
