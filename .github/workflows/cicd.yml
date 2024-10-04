@@ -51,19 +51,25 @@ jobs:
             fi
           done
 
-      # 6. Add routes for internal network traffic through the VPN
+      # 6. Manually bring tun0 interface UP if it's in DOWN state
+      - name: Bring tun0 interface up if needed
+        run: |
+          sudo ip link set dev tun0 up
+          ip a  # Check status of tun0 to verify
+
+      # 7. Add routes for internal network traffic through the VPN
       - name: Add routes for internal network traffic
         run: |
           # Ensure internal traffic goes through the VPN, while keeping other traffic through default gateway
           sudo ip route add 192.168.10.8 dev tun0  # TMDS internal server
           sudo ip route add 10.16.0.131 dev tun0  # D2SQA internal server
 
-      # 7. Test internet connection to ensure it remains functional
+      # 8. Test internet connection to ensure it remains functional
       - name: Test internet connection
         run: |
           ping -c 4 google.com || (echo "Internet connection failed after VPN connection" && exit 1)
 
-      # 8. SSH into TMDS and D2SQA servers
+      # 9. SSH into TMDS and D2SQA servers
       # If any SSH command fails, the pipeline will exit with an error.
       - name: Test SSH into TMDS and D2SQA
         run: |
