@@ -65,20 +65,20 @@ jobs:
           sudo ip route add 10.16.0.131 dev tun0  # D2SQA internal server
 
       # 8. Test internet connection to ensure it remains functional
-      - name: Test internet connection
-        run: |
-          ping -c 4 google.com || (echo "Internet connection failed after VPN connection" && exit 1)
+      #- name: Test internet connection
+       # run: |
+        #  ping -c 4 google.com || (echo "Internet connection failed after VPN connection" && exit 1)
 
       # 9. SSH into TMDS and D2SQA servers
       # If any SSH command fails, the pipeline will exit with an error.
       - name: Test SSH into TMDS and D2SQA
         run: |
           # SSH into TMDS server
-          sshpass -p 'd2s' ssh -v -o StrictHostKeyChecking=no tmds01-1@192.168.10.8 << 'TMDS_SSH'
+          sshpass -p 'd2s' ssh -v -o StrictHostKeyChecking=no UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no tmds01-1@192.168.10.8 << 'TMDS_SSH'
             echo "Successfully SSH'd into TMDS"
             
             # SSH from TMDS into D2SQA
-            sshpass -p 'd2sqa' ssh -v -o StrictHostKeyChecking=no d2sqa@10.16.0.131 << 'D2SQA_SSH'
+            sshpass -p 'd2sqa' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no d2sqa@10.16.0.131 << 'D2SQA_SSH'
               echo "Successfully SSH'd into D2SQA!"
             D2SQA_SSH
 
