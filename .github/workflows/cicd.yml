@@ -15,7 +15,6 @@ jobs:
         uses: actions/checkout@v2
 
       # 2. Install dependencies required to build OpenConnect
-      # Including gettext to avoid msgfmt issues, and sshpass for SSH access.
       - name: Install dependencies
         run: |
           sudo apt update
@@ -30,6 +29,7 @@ jobs:
           ./configure --with-vpnc-script=/etc/vpnc/vpnc-script  # Ensure vpnc-script is present
           make
           sudo make install  # Install OpenConnect
+          sudo ldconfig  # Update shared library cache
 
       # 4. Connect to the VPN using OpenConnect with split tunneling
       - name: Connect to VPN with OpenConnect (split tunneling)
