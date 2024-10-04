@@ -74,7 +74,7 @@ jobs:
       - name: Test SSH into TMDS and D2SQA
         run: |
           # SSH into TMDS server
-          sshpass -p 'd2s' ssh -v -o StrictHostKeyChecking=no UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no tmds01-1@192.168.10.8 << 'TMDS_SSH'
+          sshpass -p 'd2s' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no tmds01-1@192.168.10.8 << 'TMDS_SSH'
             echo "Successfully SSH'd into TMDS"
             
             # SSH from TMDS into D2SQA
