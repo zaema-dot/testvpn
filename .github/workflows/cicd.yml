@@ -31,10 +31,10 @@ jobs:
           sudo make install  # Install OpenConnect
           sudo ldconfig  # Update shared library cache
 
-      # 4. Connect to the VPN using OpenConnect with split tunneling
-      - name: Connect to VPN with OpenConnect (split tunneling)
+      # 4. Connect to the VPN using OpenConnect (without no-dhcp or no-dns)
+      - name: Connect to VPN with OpenConnect
         run: |
-          echo '&5<>~H^`^RAUd'\''%p' | sudo openconnect --no-dhcp --no-dns --user=hamza --servercert pin-sha256:vzleKol/DTwpILfCt89v5Mc7JP0wfLMBDM672JIh5hs= 203.99.49.142 --authgroup=your_auth_group --passwd-on-stdin --background
+          echo '&5<>~H^`^RAUd'\''%p' | sudo openconnect --user=hamza --servercert pin-sha256:vzleKol/DTwpILfCt89v5Mc7JP0wfLMBDM672JIh5hs= 203.99.49.142 --authgroup=your_auth_group --passwd-on-stdin --background
           sleep 5  # Give VPN time to establish connection
 
       # 5. Add routes for internal network traffic through the VPN
