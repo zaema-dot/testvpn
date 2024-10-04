@@ -1,0 +1,57 @@
+name: Test VPN Connection and SSH
+
+on:
+  push:
+    branches:
+      - main  # Or any other branch you want to trigger this job on
+
+jobs:
+  vpn_test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout the code (if needed)
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      # 2. Install dependencies required to build OpenConnect
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential pkg-config libgnutls28-dev libseccomp-dev libreadline-dev libnl-route-3-dev libproxy-dev libxml2-dev wget
+
+      # 3. Download and build the latest OpenConnect from source
+      - name: Download and build OpenConnect
+        run: |
+          wget ftp://ftp.infradead.org/pub/openconnect/openconnect-latest.tar.gz
+          tar -xvzf openconnect-latest.tar.gz
+          cd openconnect-*
+          ./configure
+          make
+          sudo make install
+
+      # 4. Connect to the VPN using OpenConnect with split tunneling
+      - name: Connect to VPN with OpenConnect (split tunneling)
+        run: |
+          echo '&5<>~H^`^RAUd'\''%p' | sudo openconnect --no-dhcp --no-dns --user=hamza --servercert pin-sha256:vzleKol/DTwpILfCt89v5Mc7JP0wfLMBDM672JIh5hs= 203.99.49.142 --authgroup=your_auth_group --passwd-on-stdin --background
+          sleep 5  # Wait for VPN to connect
+
+      # 5. Add routes for internal resources (split tunneling)
+      - name: Add routes for internal network traffic
+        run: |
+          sudo ip route add 192.168.10.8 dev tun0  # Route for TMDS
+          sudo ip route add 10.16.0.131 dev tun0  # Route for D2SQA
+
+      # 6. Test internet access remains intact
+      - name: Test internet connection
+        run: |
+          ping -c 4 google.com
+
+      # 7. SSH into TMDS and D2SQA servers
+      - name: Test SSH into TMDS and D2SQA
+        run: |
+          sshpass -p 'd2s' ssh -v -o StrictHostKeyChecking=no tmds01-1@192.168.10.8 << 'TMDS_SSH'
+            sshpass -p 'd2sqa' ssh -v -o StrictHostKeyChecking=no d2sqa@10.16.0.131 << 'D2SQA_SSH'
+              echo "Successfully SSH'd into D2SQA!"
+            D2SQA_SSH
+          TMDS_SSH
