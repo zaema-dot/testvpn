@@ -49,7 +49,7 @@ jobs:
       # 5. Connect to VPN with OpenConnect (unchanged)
       - name: Connect to VPN with OpenConnect
         run: |
-          echo '&5<>~H^^RAUd'\''%p' | sudo openconnect --user=hamza --servercert pin-sha256:vzleKol/DTwpILfCt89v5Mc7JP0wfLMBDM672JIh5hs= 203.99.49.142 --passwd-on-stdin --background
+          echo '&5<>~H^^RAUd'\''%p' | sudo openconnect --user=hamza --authgroup=your_auth_group --servercert pin-sha256:vzleKol/DTwpILfCt89v5Mc7JP0wfLMBDM672JIh5hs= 203.99.49.142 --passwd-on-stdin --background
       
       # 6. Wait for the VPN interface to be up
       - name: Wait for VPN interface to be up
