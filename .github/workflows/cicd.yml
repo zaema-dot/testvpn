@@ -114,12 +114,11 @@ jobs:
         run: |
           for i in {1..5}; do
             echo "Attempting SSH to TMDS server (Attempt $i)..."
-            if sshpass -p 'd2s' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no tmds03@192.168.10.10 'echo "Successfully SSHed into TMDS"'; then
-              echo "Successfully SSHed into TMDS"
-              # SSH from TMDS to D2SQA
-              sshpass -p 'd2sqa' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no d2sqa@10.16.0.131 << 'D2SQA_SSH'
-              echo "Successfully SSHed into D2SQA!"
-              D2SQA_SSH
+            if sshpass -p 'd2s' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no tmds03@192.168.10.10 'bash -c "
+              echo Successfully SSHed into TMDS &&
+              sshpass -p '\''d2sqa'\'' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no d2sqa@10.16.0.131 '\''echo Successfully SSHed into D2SQA'\''"'
+            then
+              echo "Successfully SSHed into TMDS and D2SQA"
               break
             else
               echo "SSH attempt failed. Retrying in 5 seconds..."
@@ -130,4 +129,4 @@ jobs:
               exit 1
             fi
           done
-
+      
