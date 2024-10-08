@@ -19,6 +19,12 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y build-essential pkg-config libgnutls28-dev libseccomp-dev libreadline-dev libnl-route-3-dev libproxy-dev libxml2-dev git autotools-dev autoconf vpnc-scripts gettext sshpass
+      - name: Install vpnc-script
+        run: |
+          sudo apt-get install -y vpnc-scripts
+          sudo mkdir -p /etc/vpnc/
+          sudo cp /usr/share/vpnc-scripts/vpnc-script /etc/vpnc/vpnc-script
+          sudo chmod +x /etc/vpnc/vpnc-script  # Ensure the script is executable
 
       # 3. Download and build the latest OpenConnect from Git
       - name: Download and build OpenConnect from Git
@@ -46,9 +52,11 @@ jobs:
       
       - name: Change ip routes for OpenConnect
         run: |
-          sudo ip route del default dev tun0
+          if ip route show | grep "default dev tun0"; then
+            sudo ip route del default dev tun0
+          fi
           sudo ip route add 10.0.0.0/8 dev tun0
-          sudo ip route add default via 192.168.18.1 dev ${{ steps.net_info.outputs.interface }}  # Use the detected interface
+          sudo ip route add default via 192.168.18.1 dev ${{ steps.net_info.outputs.interface }}
           sleep 5  # Give VPN time to establish connection
 
       # 6. Wait for the VPN interface to be up
