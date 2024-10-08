@@ -109,8 +109,6 @@ jobs:
       - name: Test connectivity to internal servers
         run: |
           ping -c 3 192.168.10.10 || { echo "Ping to TMDS server failed"; exit 1; }
-          ping -c 3 10.16.0.131 || { echo "Ping to D2SQA server failed"; exit 1; }
-
     
       - name: Test SSH into TMDS and D2SQA with retries
         run: |
