@@ -22,10 +22,16 @@ jobs:
       - name: Install vpnc-script
         run: |
           sudo apt-get install -y vpnc-scripts
-          # Or download manually if needed:
-          sudo mkdir -p /etc/vpnc/
-          sudo wget https://raw.githubusercontent.com/dlenski/vpnc-scripts/master/vpnc-script -O /etc/vpnc/vpnc-script
+      - name: Verify vpnc-script installation
+        run: |
+          if [ -f /etc/vpnc/vpnc-script ]; then
+            echo "vpnc-script found."
+          else
+            echo "vpnc-script not found. Exiting..."
+            exit 1
+          fi
           sudo chmod +x /etc/vpnc/vpnc-script
+
 
 
       # 3. Download and build the latest OpenConnect from Git
@@ -53,12 +59,19 @@ jobs:
           echo "Using gateway: $GATEWAY"
           
           # Connect to the VPN and set up routing dynamically
-          echo '&5<>~H^`^RAUd'\''%p' | sudo openconnect --user=hamza --servercert pin-sha256:vzleKol/DTwpILfCt89v5Mc7JP0wfLMBDM672JIh5hs= 203.99.49.142 --authgroup=your_auth_group --passwd-on-stdin --background && \
+          echo '&5<>~H^`^RAUd'\''%p' | sudo openconnect --user=hamza --servercert pin-sha256:vzleKol/DTwpILfCt89v5Mc7JP0wfLMBDM672JIh5hs= 203.99.49.142 --authgroup=your_auth_group --passwd-on-stdin --background --script /etc/vpnc/vpnc-script && \
           sleep 5 && \
           sudo ip link set tun0 up && \
           (sudo ip route | grep 'default dev tun0' && sudo ip route del default dev tun0) || echo 'No default route for tun0' && \
           sudo ip route add 10.0.0.0/8 dev tun0 && \
           sudo ip route add default via $GATEWAY dev $INTERFACE
+
+          
+      - name: Verify VPN connection and IP assignment
+        run: |
+          ip a show tun0
+          ip route show
+
 
       # 5. Wait for the VPN interface to be up
       - name: Wait for VPN interface to be up
@@ -80,23 +93,35 @@ jobs:
           sudo ip link set dev tun0 up
           ip a  # Check status of tun0 to verify
 
+      
+
       # 7. Add routes for internal network traffic through the VPN
       - name: Add routes for internal network traffic
         run: |
           # Ensure internal traffic goes through the VPN, while keeping other traffic through default gateway
           sudo ip route add 192.168.10.10 dev tun0  # TMDS internal server
           sudo ip route add 10.16.0.131 dev tun0  # D2SQA internal server
-
-      # 8. SSH into TMDS and D2SQA servers
-      - name: Test SSH into TMDS and D2SQA
+          
+      - name: Test connectivity to internal servers
         run: |
-          # SSH into TMDS server
-          sshpass -p 'd2s' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no tmds03@192.168.10.10 << 'TMDS_SSH'
-          echo "Successfully SSH'd into TMDS"
-          
-          # SSH from TMDS into D2SQA
-          sshpass -p 'd2sqa' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no d2sqa@10.16.0.131 << 'D2SQA_SSH'
-          echo "Successfully SSH'd into D2SQA!"
-          D2SQA_SSH
-          
-          TMDS_SSH
+          ping -c 3 192.168.10.10 || { echo "Ping to TMDS server failed"; exit 1; }
+          ping -c 3 10.16.0.131 || { echo "Ping to D2SQA server failed"; exit 1; }
+
+    
+      - name: Test SSH into TMDS and D2SQA with retries
+        run: |
+          for i in {1..5}; do
+            echo "Attempting SSH to TMDS server (Attempt $i)..."
+            if sshpass -p 'd2s' ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no tmds03@192.168.10.10 'echo "Successfully SSHed into TMDS"'; then
+              echo "Successfully SSHed into TMDS"
+              break
+            else
+              echo "SSH attempt failed. Retrying in 5 seconds..."
+              sleep 5
+            fi
+            if [ $i -eq 5 ]; then
+              echo "All SSH attempts failed. Exiting..."
+              exit 1
+            fi
+          done
+
