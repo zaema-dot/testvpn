@@ -52,9 +52,11 @@ jobs:
       
       - name: Change ip routes for OpenConnect
         run: |
-          if ip route show | grep "default dev tun0"; then
+          # Check if a default route exists for tun0 and delete it if present
+          if ip route show | grep -q "default dev tun0"; then
             sudo ip route del default dev tun0
           fi
+          # Add necessary routes after VPN is connected
           sudo ip route add 10.0.0.0/8 dev tun0
           sudo ip route add default via 192.168.18.1 dev ${{ steps.net_info.outputs.interface }}
           sleep 5  # Give VPN time to establish connection
