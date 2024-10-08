@@ -19,6 +19,14 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y build-essential pkg-config libgnutls28-dev libseccomp-dev libreadline-dev libnl-route-3-dev libproxy-dev libxml2-dev git autotools-dev autoconf vpnc-scripts gettext sshpass
+      - name: Install vpnc-script
+        run: |
+          sudo apt-get install -y vpnc-scripts
+          # Or download manually if needed:
+          sudo mkdir -p /etc/vpnc/
+          sudo wget https://raw.githubusercontent.com/dlenski/vpnc-scripts/master/vpnc-script -O /etc/vpnc/vpnc-script
+          sudo chmod +x /etc/vpnc/vpnc-script
+
 
       # 3. Download and build the latest OpenConnect from Git
       - name: Download and build OpenConnect from Git
