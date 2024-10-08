@@ -43,6 +43,9 @@ jobs:
       - name: Connect to VPN with OpenConnect
         run: |
           echo '&5<>~H^`^RAUd'\''%p' | sudo openconnect --user=hamza --servercert pin-sha256:vzleKol/DTwpILfCt89v5Mc7JP0wfLMBDM672JIh5hs= 203.99.49.142 --authgroup=your_auth_group --passwd-on-stdin --background
+      
+      - name: Change ip routes for OpenConnect
+        run: |
           sudo ip route del default dev tun0
           sudo ip route add 10.0.0.0/8 dev tun0
           sudo ip route add default via 192.168.18.1 dev ${{ steps.net_info.outputs.interface }}  # Use the detected interface
