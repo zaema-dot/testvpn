@@ -26,21 +26,24 @@ jobs:
 
       - name: Connect to VPN
         run: |
-          #!/usr/bin/expect -f
+          echo "#!/usr/bin/expect -f
+      
+          set username \$env(USERNAME)
+          set secret_key \$env(SECRET_KEY)
+          set vpn_server \"d2s.antc.com\"
+      
+          spawn sudo openconnect \$vpn_server
+          expect \"Please enter your username and password.\"
+          send \"\$username\\r\"
+      
+          set otp [exec oathtool --totp --base32 \$secret_key]
+          expect \"Password:\"
+          send \"vpn@d2s@321\$otp\\r\"
+          interact" > vpn_connect.exp
+      
+          chmod +x vpn_connect.exp
+          ./vpn_connect.exp
 
-          set username $env(USERNAME)
-          set secret_key $env(SECRET_KEY)
-          set vpn_server "d2s.antc.com"
-
-          spawn sudo openconnect $vpn_server
-          expect "Please enter your username and password."
-          send "$username\r"
-
-          # Generate the OTP code using oathtool
-          set otp [exec oathtool --totp --base32 $secret_key]
-          expect "Password:"
-          send "$env(VPN_PASSWORD)$otp\r"
-          interact
 
       - name: SSH into Remote Server
         run: |
