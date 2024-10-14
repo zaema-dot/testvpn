@@ -24,14 +24,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y expect oathtool sshpass openconnect
 
-      - name: Connect to VPN
+      - name: Connect to VPN with OpenConnect
         run: |
-          chmod +x expect_vpn.exp
-          expect expect_vpn.exp > vpn_connect.log 2>&1
-        continue-on-error: true  # Proceed even if there are errors in the log
-      
-      - name: Output VPN Log
-        run: cat vpn_connect.log
+          # Generate OTP
+          otp=$(oathtool --totp --base32 $SECRET_KEY)
+          echo "$VPN_PASSWORD$otp" | sudo openconnect --user=$USERNAME --passwd-on-stdin --background d2s.antc.com
+
      
       - name: Check Network Interfaces After VPN Connection
         run: ifconfig
