@@ -36,10 +36,6 @@ jobs:
       - name: Check Network Interfaces After VPN Connection
         run: ifconfig
 
-      - name: Add Route to Internal Network
-        run: |
-          sudo ip route add 10.16.0.0/24 dev tun0
-
       - name: Test VPN Connection
         run: ping -c 4 10.16.0.131
 
