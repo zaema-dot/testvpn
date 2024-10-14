@@ -1,38 +1,33 @@
 #!/usr/bin/expect -f
 
 set username "safiullah"
-set secret_key CQDKAZCPPZY3SLCBK6VZP5DU74
+set secret_key "CQDKAZCPPZY3SLCBK6VZP5DU74"
+set vpn_password "vpn@d2s@321"
 set vpn_server "d2s.antc.com"
 
 # Start VPN connection
-spawn sudo openconnect $vpn_server
+spawn sudo openconnect --verbose --user=$username $vpn_server
 
-# Generate the authenticator code using oathtool
-set otp [exec oathtool --totp --base32 $secret_key]
-
-# Handle the username prompt from the VPN
+# Expect username and password prompts
 expect {
     "Please enter your username and password." {
-        send_user "Received prompt for username.\n"
-        sleep 1
+        send_user "Sending username: $username\n"
         send "$username\r"
-        expect {
-            "Password:" {
-                send "vpn@d2s@321$otp\r"
-            }
-        }
+        exp_continue
     }
     "Username:" {
-        send_user "Received alternative prompt for username.\n"
-        sleep 1
+        send_user "Sending username again: $username\n"
         send "$username\r"
-        expect {
-            "Password:" {
-                send "vpn@d2s@321$otp\r"
-            }
-        }
+        exp_continue
+    }
+    "Password:" {
+        # Generate OTP
+        set otp [exec oathtool --totp --base32 $secret_key]
+        send_user "Generated OTP: $otp\n"
+        send_user "Sending password: $vpn_password\n"
+        send "$vpn_password$otp\r"
     }
 }
 
-# Keep interacting to maintain the connection
+# Keep the connection open
 interact
