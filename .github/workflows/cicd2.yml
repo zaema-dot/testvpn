@@ -28,7 +28,8 @@ jobs:
         run: |
           chmod +x expect_vpn.exp
           expect expect_vpn.exp > vpn_connect.log 2>&1
-          
+        continue-on-error: true  # Proceed even if there are errors in the log
+      
       - name: Output VPN Log
         run: cat vpn_connect.log
      
