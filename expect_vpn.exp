@@ -4,12 +4,39 @@ set username "safiullah"
 set secret_key CQDKAZCPPZY3SLCBK6VZP5DU74
 set vpn_server "d2s.antc.com"
 
+# Start VPN connection
 spawn sudo openconnect $vpn_server
 
 # Generate the authenticator code using oathtool
 set otp [exec oathtool --totp --base32 $secret_key]
-expect "Please enter your username and password."
-send "$username\r"
-expect "Password:"
-send "vpn@d2s@321$otp\r"
+
+# Handle the username prompt from the VPN
+expect {
+    "Please enter your username and password." {
+        send_user "Received prompt for username.\n"
+        sleep 1
+        send "$username\r"
+        expect {
+            "Password:" {
+                send_user "Received prompt for password.\n"
+                sleep 1
+                send "vpn@d2s@321$otp\r"
+            }
+        }
+    }
+    "Username:" {
+        send_user "Received alternative prompt for username.\n"
+        sleep 1
+        send "$username\r"
+        expect {
+            "Password:" {
+                send_user "Received prompt for password.\n"
+                sleep 1
+                send "vpn@d2s@321$otp\r"
+            }
+        }
+    }
+}
+
+# Keep interacting to maintain the connection
 interact
