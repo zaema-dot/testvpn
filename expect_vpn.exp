@@ -30,8 +30,6 @@ expect {
         send "$username\r"
         expect {
             "Password:" {
-                send_user "Received prompt for password.\n"
-                sleep 1
                 send "vpn@d2s@321$otp\r"
             }
         }
