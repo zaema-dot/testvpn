@@ -27,7 +27,10 @@ jobs:
       - name: Connect to VPN
         run: |
           chmod +x expect_vpn.exp
-          expect expect_vpn.exp
+          expect expect_vpn.exp > vpn_connect.log 2>&1
+          
+      - name: Output VPN Log
+        run: cat vpn_connect.log
      
       - name: Check Network Interfaces After VPN Connection
         run: ifconfig
