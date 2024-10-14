@@ -4,7 +4,7 @@ set username "safiullah"
 set secret_key CQDKAZCPPZY3SLCBK6VZP5DU74
 set vpn_server "d2s.antc.com"
 
-spawn sudo openconnect $vpn_server
+spawn sudo openconnect --user=$username --background $vpn_server
 
 # Generate the authenticator code using oathtool
 set otp [exec oathtool --totp --base32 $secret_key]
