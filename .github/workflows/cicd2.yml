@@ -43,6 +43,9 @@ jobs:
       
           chmod +x vpn_connect.exp
           ./vpn_connect.exp
+      
+      - name: Test VPN Connection
+        run: ping -c 4 10.16.0.131
 
 
       - name: SSH into Remote Server
