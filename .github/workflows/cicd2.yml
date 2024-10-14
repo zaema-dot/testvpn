@@ -1,0 +1,50 @@
+name: VPN and SSH Workflow
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  vpn-ssh:
+    runs-on: ubuntu-latest
+
+    env:
+      USERNAME: "safiullah"
+      SECRET_KEY: "CQDKAZCPPZY3SLCBK6VZP5DU74"
+      VPN_PASSWORD: "vpn@d2s@321"  # Replace with actual password for testing
+      SSH_PASSWORD: "d2sqa"
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y expect oathtool sshpass openconnect
+
+      - name: Connect to VPN
+        run: |
+          #!/usr/bin/expect -f
+
+          set username $env(USERNAME)
+          set secret_key $env(SECRET_KEY)
+          set vpn_server "d2s.antc.com"
+
+          spawn sudo openconnect $vpn_server
+          expect "Please enter your username and password."
+          send "$username\r"
+
+          # Generate the OTP code using oathtool
+          set otp [exec oathtool --totp --base32 $secret_key]
+          expect "Password:"
+          send "$env(VPN_PASSWORD)$otp\r"
+          interact
+
+      - name: SSH into Remote Server
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+          -o PreferredAuthentications=password -o PubkeyAuthentication=no \
+          d2sqa@10.16.0.131 "echo Successfully SSHed into D2SQA"
+          echo "Successfully SSHed into TMDS and D2SQA"
